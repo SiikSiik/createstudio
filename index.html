@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Grami · Pokjuki</title>
+<title>create studio_nfbf</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%237C6FF0'/%3E%3Cpath fill='white' d='M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM7 13H9C9 14.6569 10.3431 16 12 16C13.6569 16 15 14.6569 15 13H17C17 15.7614 14.7614 18 12 18C9.23858 18 7 15.7614 7 13ZM8 11C7.17157 11 6.5 10.3284 6.5 9.5C6.5 8.67157 7.17157 8 8 8C8.82843 8 9.5 8.67157 9.5 9.5C9.5 10.3284 8.82843 11 8 11ZM16 11C15.1716 11 14.5 10.3284 14.5 9.5C14.5 8.67157 15.1716 8 16 8C16.8284 8 17.5 8.67157 17.5 9.5C17.5 10.3284 16.8284 11 16 11Z'/%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -92,7 +93,12 @@
   .editor{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:22px;align-items:start}
   @media (max-width:860px){ .editor{grid-template-columns:1fr} }
   .ed-left{position:sticky;top:14px}
-  @media (max-width:860px){ .ed-left{position:static} }
+  @media (max-width:860px){
+    .ed-left{position:sticky;top:0;z-index:30;background:var(--bg);padding:8px 0 10px;transition:box-shadow .25s ease}
+    .ed-left .stage{transition:max-width .3s cubic-bezier(.4,0,.2,1),border-radius .3s ease}
+    .ed-left.stuck{box-shadow:0 7px 18px rgba(0,0,0,.16)}
+    .ed-left.stuck .stage{max-width:calc(25vh*var(--ratio,.46))!important;border-radius:11px}
+  }
   .fire-row{margin-top:10px}
   .fire-btn{width:100%;max-width:375px;margin:0 auto;height:52px;background:#16161d;border:0;border-radius:13px;font-size:15px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;gap:8px}
   .fire-btn:hover{background:#23232e}
@@ -759,6 +765,7 @@ const stageEl=document.querySelector("#confetti .stage");
 const cwInput=document.getElementById("cwInput"), chInput=document.getElementById("chInput");
 function applyCanvasSize(){
   stageEl.style.aspectRatio=cfg.cw+" / "+cfg.ch;
+  stageEl.style.setProperty("--ratio",cfg.cw/cfg.ch);
   stageEl.style.maxWidth="calc(72vh * "+(cfg.cw/cfg.ch)+")";
   stageEl.style.marginLeft="auto"; stageEl.style.marginRight="auto";
   spawnStage();
@@ -1919,7 +1926,7 @@ function gDraw(ctx,W,H,t,bgOverride,LF){
   }
 }
 function drawGradStage(tt){const f=fitCanvas(gradStageCanvas);gDraw(f.ctx,f.W,f.H,tt);}
-function applyGradCanvasSize(){gradStageWrap.style.aspectRatio=gcfg.cw+" / "+gcfg.ch;gradStageWrap.style.maxWidth="calc(72vh*("+gcfg.cw+"/"+gcfg.ch+"))";gradStageWrap.style.marginInline="auto";try{gExpUpdateUI();}catch(_){}}
+function applyGradCanvasSize(){gradStageWrap.style.aspectRatio=gcfg.cw+" / "+gcfg.ch;gradStageWrap.style.setProperty("--ratio",gcfg.cw/gcfg.ch);gradStageWrap.style.maxWidth="calc(72vh*("+gcfg.cw+"/"+gcfg.ch+"))";gradStageWrap.style.marginInline="auto";try{gExpUpdateUI();}catch(_){}}
 /* 슬라이더 */
 function gSlider(obj,key,label,min,max,step,unit,accent,oncb){
   const row=document.createElement("div");row.className="sld";
@@ -3243,7 +3250,13 @@ function frame(){
   if(running.confetti){const {ctx,W,H}=fitCanvas(stageCanvas);const a=stepParts(ctx,stageParts,cfg,W,H);if(!a){if(++stageTimer>90){spawnStage();}}else stageTimer=0;}
   requestAnimationFrame(frame);
 }
-buildDirChips(); buildDirCards(); buildShapeChips(); buildFileList(); buildSwatches(); syncSizeUI(); applyCanvasSize(); updatePngUI(); buildConfBg(); gradInit(); confCard.burst(); fromHash(); requestAnimationFrame(frame);
+function edStickyInit(){
+  const mq=window.matchMedia("(max-width:860px)");let ticking=false;
+  function upd(){ticking=false;const sc=window.scrollY||document.documentElement.scrollTop||0;const on=mq.matches&&sc>140;document.querySelectorAll(".ed-left").forEach(el=>el.classList.toggle("stuck",on));}
+  window.addEventListener("scroll",function(){if(!ticking){ticking=true;requestAnimationFrame(upd);}},{passive:true});
+  window.addEventListener("resize",upd);upd();
+}
+buildDirChips(); buildDirCards(); buildShapeChips(); buildFileList(); buildSwatches(); syncSizeUI(); applyCanvasSize(); updatePngUI(); buildConfBg(); gradInit(); confCard.burst(); edStickyInit(); fromHash(); requestAnimationFrame(frame);
 </script>
 </body>
 </html>
