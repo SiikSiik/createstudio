@@ -1126,7 +1126,7 @@ function paintParticles(ctx,parts){
 function stepPhysics(parts){let alive=false;for(const p of parts){if(p.life>=p.ttl)continue;alive=true;p.life++;p.vy+=p.grav;p.x+=p.vx;p.y+=p.vy;p.rot+=p.vr;}return alive;}
 
 /* ── 코드 모달 ── */
-const PLATFORMS={web:{title:"Web (TS)",file:"pokzukiConfetti.ts",gen:c=>genWeb(c)},rn:{title:"React Native (Skia)",file:"Confetti.tsx",gen:c=>withDoc("block",confettiDoc(c,"React Native"),genRN(c))},swift:{title:"SwiftUI (iOS)",file:"ConfettiView.swift",gen:c=>withDoc("block",confettiDoc(c,"SwiftUI"),genSwift(c))},compose:{title:"Jetpack Compose",file:"Confetti.kt",gen:c=>withDoc("block",confettiDoc(c,"Jetpack Compose"),genCompose(c))},flutter:{title:"Flutter",file:"confetti.dart",gen:c=>withDoc("block",confettiDoc(c,"Flutter"),genFlutter(c))}};
+const PLATFORMS={web:{title:"Web (TS)",file:"PokzukiConfetti.ts",gen:c=>genWeb(c)},rn:{title:"React Native (Skia)",file:"Confetti.tsx",gen:c=>withDoc("block",confettiDoc(c,"React Native"),genRN(c))},swift:{title:"SwiftUI (iOS)",file:"ConfettiView.swift",gen:c=>withDoc("block",confettiDoc(c,"SwiftUI"),genSwift(c))},compose:{title:"Jetpack Compose",file:"Confetti.kt",gen:c=>withDoc("block",confettiDoc(c,"Jetpack Compose"),genCompose(c))},flutter:{title:"Flutter",file:"confetti.dart",gen:c=>withDoc("block",confettiDoc(c,"Flutter"),genFlutter(c))}};
 let curPlatform="web", modalFile="export.txt";
 function openExport(p){curPlatform=p;modalFile=PLATFORMS[p].file;document.getElementById("modalTitle").textContent=PLATFORMS[p].title+" · "+PLATFORMS[p].file;document.getElementById("modalCode").value=PLATFORMS[p].gen(cfg);document.getElementById("exportModal").classList.add("show");}
 function closeExport(){document.getElementById("exportModal").classList.remove("show");}
@@ -1161,7 +1161,7 @@ async function exportPng(btn){
     acc+=stepPer; while(acc>=1){ stepPhysics(parts); acc--; }
     if(f%8===0){ document.getElementById("pngLabel").textContent="만드는 중… "+Math.round(f/N*100)+"%"; await new Promise(r=>setTimeout(r,0)); }
   }
-  downloadBlob(new Blob([zipStore(files)],{type:"application/zip"}),"pokjuki_"+fps+"fps_"+W+"x"+H+".zip");
+  downloadBlob(new Blob([zipStore(files)],{type:"application/zip"}),"Pokzuki_"+fps+"fps_"+W+"x"+H+".zip");
   btn.disabled=false; updatePngUI();
 }
 function confExportVideo(btn){
@@ -1189,7 +1189,7 @@ function confExportVideo(btn){
   const track=stream.getVideoTracks()[0];
   let rec; try{ rec=new MediaRecorder(stream,mime?{mimeType:mime}:undefined); }catch(_){ try{rec=new MediaRecorder(stream);}catch(e){ cv.remove(); restore(); gShowNotice("녹화를 시작할 수 없어요.","'PNG'로 받아 주세요.",null); return; } }
   const chunks=[]; rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
-  rec.onstop=()=>{ const blob=new Blob(chunks,{type:mime||"video/webm"}); downloadBlob(blob,"pokjuki_"+fps+"fps_"+W+"x"+H+"."+ext); try{stream.getTracks().forEach(t=>t.stop());}catch(_){} cv.remove(); restore(); btn.disabled=false; updatePngUI(); };
+  rec.onstop=()=>{ const blob=new Blob(chunks,{type:mime||"video/webm"}); downloadBlob(blob,"Pokzuki_"+fps+"fps_"+W+"x"+H+"."+ext); try{stream.getTracks().forEach(t=>t.stop());}catch(_){} cv.remove(); restore(); btn.disabled=false; updatePngUI(); };
   btn.disabled=true;
   let f=0, acc=0, timer=0;
   function tick(){
@@ -1208,7 +1208,7 @@ function confExportVideo(btn){
 function saveSettings(){
   const data={app:"pokjuki",version:1,cfg:{active:cfg.active,expanded:cfg.expanded,configs:cfg.configs,shapes:cfg.shapes,useOriginal:cfg.useOriginal,colorMode:cfg.colorMode,colors:cfg.colors,bg:cfg.bg,showGuide:cfg.showGuide,cw:cfg.cw,ch:cfg.ch,lockRatio:cfg.lockRatio,pngFps:cfg.pngFps,pngScale:cfg.pngScale},
     images:images.map(r=>({name:r.name,url:r.url,isSvg:r.isSvg,svgText:r.svgText,on:r.on}))};
-  gOpenModal("Pokzuki · 설정 · pokzuki-settings.json","pokzuki-settings.json",JSON.stringify(data,null,2));
+  gOpenModal("Pokzuki · 설정 · Pokzuki-settings.json","Pokzuki-settings.json",JSON.stringify(data,null,2));
 }
 function applySettings(d){
   const c=d.cfg||{};
@@ -1300,17 +1300,17 @@ function genWeb(c){
   const J=JSON.stringify({dirs:exportDirs(c),shapes:c.shapes,useOriginal:c.useOriginal,colors:c.colors});
   const docLines=confettiDoc(c,"Web");
   const head=[].concat(
-    ["Pokzuki Confetti — Web (바닐라 TypeScript · 어떤 프레임워크에서도 사용 가능)","파일명: pokzukiConfetti.ts",""],
+    ["Pokzuki Confetti — Web (바닐라 TypeScript · 어떤 프레임워크에서도 사용 가능)","파일명: PokzukiConfetti.ts",""],
     docLines,
     ["","[사용법 — TypeScript]",
-     "  import { createConfetti } from './pokzukiConfetti';",
+     "  import { createConfetti } from './PokzukiConfetti';",
      "  const canvas = document.querySelector<HTMLCanvasElement>('#myCanvas')!;",
      "  const stop = createConfetti(canvas);   // 시작",
      "  // stop();                              // 정지",
      "",
      "[사용법 — React + TS]",
      "  import { useEffect, useRef } from 'react';",
-     "  import { createConfetti } from './pokzukiConfetti';",
+     "  import { createConfetti } from './PokzukiConfetti';",
      "  export function Confetti() {",
      "    const ref = useRef<HTMLCanvasElement>(null);",
      "    useEffect(() => { if (ref.current) return createConfetti(ref.current); }, []);",
@@ -2318,17 +2318,17 @@ function genGradWeb(g){
   const sp=Math.round((+g.speed||5)*1000)/1000;
   const docLines=gramiDoc(g,"Web");
   const head=[].concat(
-    ["Grami Gradient — Web (바닐라 TypeScript · 어떤 프레임워크에서도 사용 가능)","파일명: gramiGradient.ts",""],
+    ["Grami Gradient — Web (바닐라 TypeScript · 어떤 프레임워크에서도 사용 가능)","파일명: GramiGradient.ts",""],
     docLines,
     ["","[사용법 — TypeScript]",
-     "  import { createGradient } from './gramiGradient';",
+     "  import { createGradient } from './GramiGradient';",
      "  const canvas = document.querySelector<HTMLCanvasElement>('#myCanvas')!;",
      "  const stop = createGradient(canvas);   // 시작",
      "  // stop();                              // 정지",
      "",
      "[사용법 — React + TS]",
      "  import { useEffect, useRef } from 'react';",
-     "  import { createGradient } from './gramiGradient';",
+     "  import { createGradient } from './GramiGradient';",
      "  export function Gradient() {",
      "    const ref = useRef<HTMLCanvasElement>(null);",
      "    useEffect(() => { if (ref.current) return createGradient(ref.current); }, []);",
@@ -2407,7 +2407,7 @@ function genGradWeb(g){
   L.push("export default createGradient;");
   return L.join("\n");
 }
-function gOpenWebExport(){gOpenModal("Grami · Web (TS) · gramiGradient.ts","gramiGradient.ts",genGradWeb(gcfg));}
+function gOpenWebExport(){gOpenModal("Grami · Web (TS) · GramiGradient.ts","GramiGradient.ts",genGradWeb(gcfg));}
 /* 네이티브 — 광원·물결·상승·불꽃 4개 모드 모두 각 플랫폼 네이티브 캔버스로 직접 그림(우리 엔진 수식과 동일). 마스크는 미적용(안내), Compose는 블러 생략. */
 function gB64(s){return btoa(unescape(encodeURIComponent(s)));}
 function gHex6(h){var c=gHex2rgb(h);function x(n){return ("0"+(n||0).toString(16)).slice(-2).toUpperCase();}return x(c.r)+x(c.g)+x(c.b);}
@@ -3335,10 +3335,10 @@ const GRAMI_NATIVE={
   rn:{title:"React Native · GramiGradient.tsx",file:"GramiGradient.tsx",name:"React Native",gen:genGradRN},
   swift:{title:"SwiftUI · GramiGradientView.swift",file:"GramiGradientView.swift",name:"SwiftUI",gen:genGradSwift},
   compose:{title:"Compose · GramiGradient.kt",file:"GramiGradient.kt",name:"Jetpack Compose",gen:genGradCompose},
-  flutter:{title:"Flutter · grami_gradient.dart",file:"grami_gradient.dart",name:"Flutter",gen:genGradFlutter}
+  flutter:{title:"Flutter · GramiGradient.dart",file:"GramiGradient.dart",name:"Flutter",gen:genGradFlutter}
 };
 function gOpenNative(p){var P=GRAMI_NATIVE[p];var open=function(){gOpenModal("Grami · "+P.title,P.file,withDoc("block",gramiDoc(gcfg,P.name),P.gen(gcfg)));};if(gMaskActive(gcfg)){gShowNotice("마스크는 웹코드에만 적용되고 다른 개발 코드는 광원 그라디언트만 그려져요.","마스크까지 적용하고 싶으면 'Web' 코드 복사를 해주세요.",open);}else{open();}}
-function gSaveSettings(){gOpenModal("Grami · 설정 · grami-settings.json","grami-settings.json",JSON.stringify(gcfg,null,2));}
+function gSaveSettings(){gOpenModal("Grami · 설정 · Grami-settings.json","Grami-settings.json",JSON.stringify(gcfg,null,2));}
 function gApplySettings(o){
   if(!o||typeof o!=="object")return false;
   ["mode","speed","loopSec","hasBg","bg","cw","ch","lockRatio","orbs","waves","bounceColors","flameColors","orbOffsetX","orbOffsetY","waveHeight","waveSpread","bounceDir","bounceRiseMax","bounceSize","bounceBlur","flameColW","flameColH","flameColBlur"].forEach(k=>{if(o[k]!==undefined)gcfg[k]=o[k];});
@@ -3423,7 +3423,7 @@ async function gExportSeq(btn){
     files.push({name:"frame_"+String(f+1).padStart(4,"0")+".png",data:dataUrlToBytes(off.toDataURL("image/png"))});
     if(f%6===0){ lbl.textContent="만드는 중… "+Math.round(f/N*100)+"%"; await new Promise(r=>setTimeout(r,0)); }
   }
-  downloadBlob(new Blob([zipStore(files)],{type:"application/zip"}),"grami_"+gModeName()+"_loop_"+fps+"fps_"+W+"x"+H+".zip");
+  downloadBlob(new Blob([zipStore(files)],{type:"application/zip"}),"Grami_"+gModeName()+"_loop_"+fps+"fps_"+W+"x"+H+".zip");
   btn.disabled=false; gExpUpdateUI();
 }
 function gExportVideo(btn){
@@ -3442,7 +3442,7 @@ function gExportVideo(btn){
   const chunks=[]; rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
   let gtv=0, raf=0, t0=0, done=false;
   function finish(){ if(done)return; done=true; cancelAnimationFrame(raf); try{rec.stop();}catch(_){}}
-  rec.onstop=()=>{ const blob=new Blob(chunks,{type:mime||"video/webm"}); downloadBlob(blob,"grami_"+gModeName()+"_loop_"+fps+"fps_"+W+"x"+H+"."+ext); try{stream.getTracks().forEach(t=>t.stop());}catch(_){} cv.remove(); btn.disabled=false; gExpUpdateUI(); };
+  rec.onstop=()=>{ const blob=new Blob(chunks,{type:mime||"video/webm"}); downloadBlob(blob,"Grami_"+gModeName()+"_loop_"+fps+"fps_"+W+"x"+H+"."+ext); try{stream.getTracks().forEach(t=>t.stop());}catch(_){} cv.remove(); btn.disabled=false; gExpUpdateUI(); };
   btn.disabled=true;
   function loop(ts){ if(!t0)t0=ts; const el=ts-t0; gtv=(el/1000)*gtPerSec; gDraw(ctx,W,H,gtv,vbg,LF);
     const left=Math.max(0,durMs-el); lbl.textContent="녹화 중… "+(left/1000).toFixed(1)+"초";
