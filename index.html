@@ -1123,7 +1123,7 @@ function paintParticles(ctx,parts){
 function stepPhysics(parts){let alive=false;for(const p of parts){if(p.life>=p.ttl)continue;alive=true;p.life++;p.vy+=p.grav;p.x+=p.vx;p.y+=p.vy;p.rot+=p.vr;}return alive;}
 
 /* ── 코드 모달 ── */
-const PLATFORMS={web:{title:"Web (TS)",file:"pokzukiConfetti.ts",gen:c=>genWeb(c)},rn:{title:"React Native",file:"Confetti.js",gen:c=>withDoc("block",confettiDoc(c,"React Native"),genRN(c))},swift:{title:"SwiftUI (iOS)",file:"ConfettiView.swift",gen:c=>withDoc("block",confettiDoc(c,"SwiftUI"),genSwift(c))},compose:{title:"Jetpack Compose",file:"Confetti.kt",gen:c=>withDoc("block",confettiDoc(c,"Jetpack Compose"),genCompose(c))},flutter:{title:"Flutter",file:"confetti.dart",gen:c=>withDoc("block",confettiDoc(c,"Flutter"),genFlutter(c))}};
+const PLATFORMS={web:{title:"Web (TS)",file:"pokzukiConfetti.ts",gen:c=>genWeb(c)},rn:{title:"React Native (Skia)",file:"Confetti.tsx",gen:c=>withDoc("block",confettiDoc(c,"React Native"),genRN(c))},swift:{title:"SwiftUI (iOS)",file:"ConfettiView.swift",gen:c=>withDoc("block",confettiDoc(c,"SwiftUI"),genSwift(c))},compose:{title:"Jetpack Compose",file:"Confetti.kt",gen:c=>withDoc("block",confettiDoc(c,"Jetpack Compose"),genCompose(c))},flutter:{title:"Flutter",file:"confetti.dart",gen:c=>withDoc("block",confettiDoc(c,"Flutter"),genFlutter(c))}};
 let curPlatform="web", modalFile="export.txt";
 function openExport(p){curPlatform=p;modalFile=PLATFORMS[p].file;document.getElementById("modalTitle").textContent=PLATFORMS[p].title+" · "+PLATFORMS[p].file;document.getElementById("modalCode").value=PLATFORMS[p].gen(cfg);document.getElementById("exportModal").classList.add("show");}
 function closeExport(){document.getElementById("exportModal").classList.remove("show");}
@@ -1327,97 +1327,142 @@ function genWeb(c){
 
 function genRN(c){
   const assets=images.filter(r=>r.on && r.img.complete && r.img.naturalWidth).map(r=> r.isSvg ? {type:"svg",xml:r.svgText} : {type:"png",uri:r.url});
-  const hasPng=assets.some(a=>a.type==="png");
+  const hasImg=assets.length>0;
   let starPts=""; for(let i=0;i<10;i++){const rad=i%2?24:50,a=Math.PI*i/5-Math.PI/2;starPts+=(i?" ":"")+(Math.cos(a)*rad).toFixed(1)+","+(Math.sin(a)*rad).toFixed(1);}
   const J=JSON.stringify({dirs:exportDirs(c),shapes:c.shapes,useOriginal:c.useOriginal,colors:c.colors});
-  const L=[];
-  L.push("// Confetti.js — React Native");
-  L.push("// 설치: npx expo install react-native-svg");
-  L.push("// <Confetti width={360} height={640} /> 처럼 사용. 탭하면 다시 터집니다.");
-  if(hasPng) L.push("// 참고: PNG는 원본 색으로만 표시됩니다(팔레트 틴트는 SVG·기본도형만).");
-  L.push("import React,{useState,useRef,useCallback,useEffect} from 'react';");
-  L.push("import {Animated,Easing,Pressable,Image} from 'react-native';");
-  L.push("import Svg,{Rect,Circle,Polygon,Path,SvgXml} from 'react-native-svg';");
-  L.push("");
-  L.push("const CFG = "+J+";");
-  L.push("const ASSETS = "+JSON.stringify(assets)+";");
-  L.push('const STAR = "'+starPts+'";');
-  L.push('const SMILEY = "'+SMILEY_D+'";');
-  L.push("");
-  L.push("function tintSvg(xml,color){return xml.replace(/fill=\"(?!none\")[^\"]*\"/gi,'fill=\"'+color+'\"').replace(/fill:\\s*(?!none)[^;\"'}\\s]+/gi,'fill:'+color);}");
-  L.push("");
-  L.push("function Shape({kind,size,color}){");
-  L.push("  return (");
-  L.push('    <Svg width={size} height={size} viewBox="-50 -50 100 100">');
-  L.push("      {kind==='circle' ? <Circle cx={0} cy={0} r={50} fill={color}/> :");
-  L.push('       kind===\'triangle\' ? <Polygon points="0,-50 50,42 -50,42" fill={color}/> :');
-  L.push("       kind==='star' ? <Polygon points={STAR} fill={color}/> :");
-  L.push('       kind===\'smiley\' ? <Path d={SMILEY} fill={color} transform="scale(5) translate(-12,-12)"/> :');
-  L.push('       kind===\'heart\' ? <Path d="M0 28 C 50 -28 90 18 0 60 C -90 18 -50 -28 0 28 Z" fill={color}/> :');
-  L.push("       <Rect x={-50} y={-31} width={100} height={62} fill={color}/>}");
-  L.push("    </Svg>");
-  L.push("  );");
-  L.push("}");
-  L.push("");
-  L.push("function startPos(dc,W,H,sr){");
-  L.push("  const line=dc.mode==='line'; let x,y,ang; const k=dc.key;");
-  L.push("  if(k==='center'){x=dc.startX/100*W;y=dc.startY/100*H;ang=dc.spread>=360?Math.random()*Math.PI*2:(Math.random()-0.5)*sr-Math.PI/2;}");
-  L.push("  else if(k==='top'||k==='bottom'){y=dc.startY/100*H;x=dc.startX/100*W+(line?(Math.random()-0.5)*dc.lineLen/100*W:0);ang=(Math.random()-0.5)*sr*0.4+(k==='bottom'?-Math.PI/2:Math.PI/2);}");
-  L.push("  else{const lf=Math.random()<0.5;x=(lf?dc.startX:100-dc.startX)/100*W;y=dc.startY/100*H+(line?(Math.random()-0.5)*dc.lineLen/100*H:0);const b=-Math.PI/2+(lf?1:-1)*Math.PI*0.30;ang=b+(Math.random()-0.5)*sr*0.4;}");
-  L.push("  return {x,y,ang};");
-  L.push("}");
-  L.push("");
-  L.push("export default function Confetti({width="+c.cw+",height="+c.ch+",style}){");
-  L.push("  const [parts,setParts]=useState([]); const refs=useRef([]);");
-  L.push("  const fire=useCallback(()=>{");
-  L.push("    refs.current.forEach(a=>a&&a.stop&&a.stop()); refs.current=[];");
-  L.push("    const c=CFG,W=width,H=height,cols=c.colors.length?c.colors:['#fff'];");
-  L.push("    const ASS=ASSETS, pool=[]; c.shapes.forEach(k=>pool.push({kind:k})); ASS.forEach((a,idx)=>pool.push({kind:a.type,idx})); if(!pool.length)pool.push({kind:'rect'});");
-  L.push("    const ps=[];");
-  L.push("    c.dirs.forEach(dc=>{");
-  L.push("      const bs=W*0.017*(dc.speed/5)*(dc.range/5),sp=W*(dc.size/400),sr=dc.spread/180*Math.PI,grav=W*0.00045*(dc.gravity/4);");
-  L.push("      for(let i=0;i<dc.count;i++){");
-  L.push("        const P=startPos(dc,W,H,sr),v=(0.5+Math.random()*0.5)*bs;");
-  L.push("        const vx=Math.cos(P.ang)*v,vy=Math.sin(P.ang)*v,ttl=110+Math.random()*60,size=sp*(0.6+Math.random()*0.8);");
-  L.push("        const hf=dc.flip>0,flipX=Math.random()<0.5,flipPhase=hf?Math.random()*Math.PI*2:0,flipTurns=hf?dc.flip*(0.6+Math.random()*0.8):0;");
-  L.push("        const rot0=Math.random()*360,rotEnd=rot0+(Math.random()-0.5)*dc.spin*180,N=18,inR=[],xs=[],ys=[],scs=[],ops=[];");
-  L.push("        const color=cols[(Math.random()*cols.length)|0], e=pool[(Math.random()*pool.length)|0];");
-  L.push("        let kind=e.kind,xml=null,uri=null;");
-  L.push("        if(kind==='svg'){const a=ASS[e.idx]; xml=c.useOriginal?a.xml:tintSvg(a.xml,color);}");
-  L.push("        else if(kind==='png'){uri=ASS[e.idx].uri;}");
-  L.push("        for(let kk=0;kk<N;kk++){const t=kk/(N-1);inR.push(t);const f=t*ttl;xs.push(P.x+vx*f);ys.push(P.y+vy*f+0.5*grav*f*f);scs.push(flipTurns?Math.cos(flipPhase+flipTurns*Math.PI*2*t):1);ops.push(Math.pow(Math.max(0,1-t),dc.fade/5));}");
-  L.push("        ps.push({id:i+'-'+Math.random()+dc.key,size,kind,xml,uri,color,prog:new Animated.Value(0),inR,xs,ys,scs,ops,flipX,flipTurns,rot0,rotEnd,dur:1500+Math.random()*1000});");
-  L.push("      }");
-  L.push("    });");
-  L.push("    setParts(ps);");
-  L.push("    ps.forEach(p=>{");
-  L.push("      p.tx=p.prog.interpolate({inputRange:p.inR,outputRange:p.xs});");
-  L.push("      p.ty=p.prog.interpolate({inputRange:p.inR,outputRange:p.ys});");
-  L.push("      const sc=p.flipTurns?p.prog.interpolate({inputRange:p.inR,outputRange:p.scs}):1;");
-  L.push("      p.tsx=p.flipX?sc:1; p.tsy=p.flipX?1:sc;");
-  L.push("      p.trot=p.prog.interpolate({inputRange:[0,1],outputRange:[p.rot0+'deg',p.rotEnd+'deg']});");
-  L.push("      p.top=p.prog.interpolate({inputRange:p.inR,outputRange:p.ops});");
-  L.push("      const an=Animated.timing(p.prog,{toValue:1,duration:p.dur,easing:Easing.linear,useNativeDriver:true});");
-  L.push("      an.start(); refs.current.push(an);");
-  L.push("    });");
-  L.push("  },[width,height]);");
-  L.push("  useEffect(()=>{const t=setTimeout(fire,60);return()=>clearTimeout(t);},[fire]);");
-  L.push("  return (");
-  L.push("    <Pressable onPress={fire} style={[{width,height,overflow:'hidden'},style]}>");
-  L.push("      {parts.map(p=>(");
-  L.push("        <Animated.View key={p.id} pointerEvents='none' style={{position:'absolute',left:0,top:0,");
-  L.push("          width:p.size,height:p.size,opacity:p.top,");
-  L.push("          transform:[{translateX:p.tx},{translateY:p.ty},{rotate:p.trot},{scaleX:p.tsx},{scaleY:p.tsy}]}}>");
-  L.push("          {p.kind==='svg' ? <SvgXml xml={p.xml} width={p.size} height={p.size}/> :");
-  L.push("           p.kind==='png' ? <Image source={{uri:p.uri}} style={{width:p.size,height:p.size}} resizeMode='contain'/> :");
-  L.push("           <Shape kind={p.kind} size={p.size} color={p.color}/>}");
-  L.push("        </Animated.View>");
-  L.push("      ))}");
-  L.push("    </Pressable>");
-  L.push("  );");
-  L.push("}");
-  return L.join("\n");
+  const hookLines=assets.map((a,i)=> a.type==="png"
+    ? "  const _a"+i+" = useImage(ASSETS["+i+"].type === 'png' ? ASSETS["+i+"].uri : '');"
+    : "  const _a"+i+" = useMemo(() => Skia.SVG.MakeFromString(ASSETS["+i+"].type === 'svg' ? ASSETS["+i+"].xml : ''), []);"
+  ).join("\n");
+  const imagesArr=assets.length
+    ? "  const IMAGES = useMemo(() => [\n"+assets.map((a,i)=>"    "+(a.type==="png"?"{ img: _a"+i+" }":"{ svg: _a"+i+" }")).join(",\n")+"\n  ], ["+assets.map((a,i)=>"_a"+i).join(", ")+"]);"
+    : "  const IMAGES: Array<{ img?: any; svg?: any }> = [];";
+  const note=hasImg?"// PNG·SVG 이미지는 원본 색으로 표시돼요 (팔레트 색은 기본 도형에 적용됩니다).\n":"";
+  return `// Confetti.tsx — React Native (Skia + TypeScript)
+// 설치: npx expo install @shopify/react-native-skia
+// <Confetti width={${c.cw}} height={${c.ch}} /> 처럼 사용. 탭하면 다시 터집니다.
+${note}import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
+import { View, Pressable } from 'react-native';
+import type { StyleProp, ViewStyle } from 'react-native';
+import { Canvas, Group, Path, Image, ImageSVG, Skia, useImage } from '@shopify/react-native-skia';
+
+type Dir = {
+  key: string; count: number; size: number; speed: number; range: number; spread: number;
+  gravity: number; spin: number; flip: number; fade: number; startX: number; startY: number;
+  mode: string; lineLen: number;
+};
+type Cfg = { dirs: Dir[]; shapes: string[]; useOriginal: boolean; colors: string[] };
+type Asset = { type: 'png'; uri: string } | { type: 'svg'; xml: string };
+type Particle = {
+  x: number; y: number; vx: number; vy: number; size: number; rot: number; vr: number;
+  color: string; grav: number; fade: number; life: number; ttl: number;
+  flipX: boolean; flipPhase: number; flipTurns: number; kind: string; idx: number;
+};
+
+const CFG: Cfg = ${J};
+const ASSETS: Asset[] = ${JSON.stringify(assets)};
+const STAR = "${starPts}";
+const SMILEY = "${SMILEY_D}";
+
+function startPos(dc: Dir, W: number, H: number): { x: number; y: number; ang: number } {
+  const line = dc.mode === 'line'; let x: number, y: number, ang: number; const k = dc.key;
+  if (k === 'center') { x = dc.startX/100*W; y = dc.startY/100*H; ang = dc.spread>=360 ? Math.random()*Math.PI*2 : (Math.random()-0.5)*sr(dc) - Math.PI/2; }
+  else if (k === 'top' || k === 'bottom') { y = dc.startY/100*H; x = dc.startX/100*W + (line ? (Math.random()-0.5)*dc.lineLen/100*W : 0); ang = (Math.random()-0.5)*sr(dc)*0.4 + (k==='bottom' ? -Math.PI/2 : Math.PI/2); }
+  else { const lf = Math.random()<0.5; x = (lf?dc.startX:100-dc.startX)/100*W; y = dc.startY/100*H + (line ? (Math.random()-0.5)*dc.lineLen/100*H : 0); const b = -Math.PI/2 + (lf?1:-1)*Math.PI*0.30; ang = b + (Math.random()-0.5)*sr(dc)*0.4; }
+  return { x, y, ang };
 }
+function sr(dc: Dir): number { return dc.spread/180*Math.PI; }
+
+function buildParticles(W: number, H: number): Particle[] {
+  const cols = CFG.colors.length ? CFG.colors : ['#fff'];
+  const pool: Array<{ kind: string; idx: number }> = [];
+  CFG.shapes.forEach(k => pool.push({ kind: k, idx: -1 }));
+  ASSETS.forEach((a, idx) => pool.push({ kind: a.type, idx }));
+  if (!pool.length) pool.push({ kind: 'rect', idx: -1 });
+  const ps: Particle[] = [];
+  CFG.dirs.forEach(dc => {
+    const bs = W*0.017*(dc.speed/5)*(dc.range/5), sp = W*(dc.size/400), grav = W*0.00045*(dc.gravity/4), hf = dc.flip>0;
+    for (let i=0;i<dc.count;i++) {
+      const P = startPos(dc, W, H), v = (0.5+Math.random()*0.5)*bs, e = pool[(Math.random()*pool.length)|0];
+      ps.push({
+        x: P.x, y: P.y, vx: Math.cos(P.ang)*v, vy: Math.sin(P.ang)*v,
+        size: sp*(0.6+Math.random()*0.8), rot: Math.random()*Math.PI*2, vr: (Math.random()-0.5)*dc.spin*0.05,
+        color: cols[(Math.random()*cols.length)|0], grav, fade: dc.fade, life: 0, ttl: 95+Math.random()*55,
+        flipX: Math.random()<0.5, flipPhase: hf?Math.random()*Math.PI*2:0, flipTurns: hf?dc.flip*(0.6+Math.random()*0.8):0,
+        kind: e.kind, idx: e.idx,
+      });
+    }
+  });
+  return ps;
+}
+
+type ConfettiProps = { width?: number; height?: number; style?: StyleProp<ViewStyle> };
+
+export default function Confetti({ width = ${c.cw}, height = ${c.ch}, style }: ConfettiProps) {
+  const partsRef = useRef<Particle[]>([]);
+  const timerRef = useRef(0);
+  const [, setTick] = useState(0);
+
+${hookLines}
+${imagesArr}
+
+  const PATHS = useMemo(() => {
+    const out: Record<string, any> = {};
+    const rect = Skia.Path.Make(); rect.addRect(Skia.XYWHRect(-50, -31, 100, 62)); out.rect = rect;
+    const circle = Skia.Path.Make(); circle.addCircle(0, 0, 50); out.circle = circle;
+    const tri = Skia.Path.Make(); tri.moveTo(0, -50); tri.lineTo(50, 42); tri.lineTo(-50, 42); tri.close(); out.triangle = tri;
+    const star = Skia.Path.Make(); STAR.split(' ').forEach((pt, i) => { const xy = pt.split(',').map(Number); i ? star.lineTo(xy[0], xy[1]) : star.moveTo(xy[0], xy[1]); }); star.close(); out.star = star;
+    out.heart = Skia.Path.MakeFromSVGString('M0 28 C 50 -28 90 18 0 60 C -90 18 -50 -28 0 28 Z') || rect;
+    const sm = Skia.Path.MakeFromSVGString(SMILEY); if (sm) { sm.offset(-12, -12); out.smiley = sm; } else { out.smiley = rect; }
+    return out;
+  }, []);
+
+  const spawn = useCallback(() => { partsRef.current = buildParticles(width, height); timerRef.current = 0; }, [width, height]);
+
+  useEffect(() => {
+    spawn();
+    let on = true;
+    const loop = () => {
+      if (!on) return;
+      const ps = partsRef.current; let alive = false;
+      for (let i=0;i<ps.length;i++) { const p = ps[i]; if (p.life>=p.ttl) continue; alive = true; p.life++; p.vy += p.grav; p.x += p.vx; p.y += p.vy; p.rot += p.vr; }
+      if (!alive) { if (++timerRef.current > 60) spawn(); } else timerRef.current = 0;
+      setTick(v => v + 1);
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+    return () => { on = false; };
+  }, [spawn]);
+
+  return (
+    <View style={[{ width, height, overflow: 'hidden' }, style]}>
+      <Pressable onPress={spawn} style={{ flex: 1 }}>
+        <Canvas style={{ flex: 1 }}>
+          {partsRef.current.map((p, i) => {
+            if (p.life >= p.ttl) return null;
+            const pr = p.life / p.ttl;
+            const op = Math.pow(Math.max(0, 1 - pr), (p.fade || 5) / 5);
+            if (op <= 0.001) return null;
+            const sc = p.flipTurns ? Math.cos(p.flipPhase + p.flipTurns * Math.PI * 2 * pr) : 1;
+            const isImg = p.kind === 'png' || p.kind === 'svg';
+            const base = p.kind === 'smiley' ? p.size / 24 : isImg ? 1 : p.size / 100;
+            const sx = base * (p.flipX ? sc : 1);
+            const sy = base * (p.flipX ? 1 : sc);
+            const tf = [{ translateX: p.x }, { translateY: p.y }, { rotate: p.rot }, { scaleX: sx }, { scaleY: sy }];
+            let child: React.ReactNode;
+            if (p.kind === 'png') { const im = IMAGES[p.idx] && IMAGES[p.idx].img; if (!im) return null; child = <Image image={im} x={-p.size/2} y={-p.size/2} width={p.size} height={p.size} fit="contain" />; }
+            else if (p.kind === 'svg') { const sv = IMAGES[p.idx] && IMAGES[p.idx].svg; if (!sv) return null; child = <ImageSVG svg={sv} x={-p.size/2} y={-p.size/2} width={p.size} height={p.size} />; }
+            else { const pa = PATHS[p.kind] || PATHS.rect; child = <Path path={pa} color={p.color} />; }
+            return <Group key={i} transform={tf} opacity={op}>{child}</Group>;
+          })}
+        </Canvas>
+      </Pressable>
+    </View>
+  );
+}`;
+}
+
+
 
 /* ── SwiftUI ── */
 function genSwift(c){
