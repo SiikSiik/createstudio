@@ -771,15 +771,17 @@ const cwInput=document.getElementById("cwInput"), chInput=document.getElementByI
 function fitPreview(el,cw,ch){
   const host=el.parentElement, stuck=host.classList.contains("stuck");
   const vh=window.innerHeight, mobile=window.innerWidth<=860;
-  const maxH=stuck?vh*0.25:Math.min(vh*0.72, mobile?540:660);
-  let hostW=host.clientWidth; if(!hostW) hostW=Math.min(window.innerWidth,900);
-  const W0=Math.min(hostW, Math.round(maxH*0.44));
-  const ratio=cw/ch; let w=W0, h=w/ratio;
-  if(h>maxH){h=maxH; w=h*ratio;}
+  const availH=stuck?vh*0.25:Math.min(vh*0.72, mobile?540:660);
+  let availW=host.clientWidth;
+  if(availW){const cs=getComputedStyle(host);availW-=(parseFloat(cs.paddingLeft)||0)+(parseFloat(cs.paddingRight)||0);}
+  if(!availW||availW<40) availW=Math.min(window.innerWidth,900);
+  const sMax=availH/812;                                   // 기준 높이(기본 캔버스 812)일 때 세로를 꽉 채우는 스케일
+  const s=Math.min(availW/cw, availH/ch, sMax);            // 남는 공간까지 쓰되, 작은 캔버스를 과하게 확대하진 않음
+  const w=Math.round(cw*s), h=Math.round(ch*s);
   el.style.aspectRatio="auto"; el.style.maxWidth="none";
-  el.style.width=Math.round(w)+"px"; el.style.height=Math.round(h)+"px";
+  el.style.width=w+"px"; el.style.height=h+"px";
   el.style.marginLeft="auto"; el.style.marginRight="auto";
-  el.style.setProperty("--ratio",ratio);
+  el.style.setProperty("--ratio",cw/ch);
 }
 function applyCanvasSize(){ fitPreview(stageEl,cfg.cw,cfg.ch); spawnStage(); }
 const ratioLockBtn=document.getElementById("ratioLock");
