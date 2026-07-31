@@ -12,6 +12,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double:wght@100..900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/lottie-web@5.12.2/build/player/lottie_light.min.js"></script>
 <style>
+  /* 구글 폰트(fonts.gstatic.com)가 네트워크 차단 등으로 못 불러와질 때를 대비한 로컬 폴백.
+     ./fonts/BitcountGridDouble-300.ttf 파일을 이 경로에 넣어두면, 구글 CDN이 막혀도
+     이 폰트로 대체되어 GRAMI/POKZUKI 타이틀이 항상 의도한 모양으로 나온다.
+     (파일이 없으면 그냥 무시되고 기존 구글 폰트 → sans-serif 순으로 폴백됨) */
+  @font-face{
+    font-family:"Bitcount Grid Double";
+    font-style:normal;
+    font-weight:300;
+    font-display:swap;
+    src:url("./fonts/BitcountGridDouble-300.ttf") format("truetype");
+  }
   :root{
     --bg:#0a0a10; --panel:#15151f; --panel-2:#1c1c28;
     --line:rgba(255,255,255,.08); --line-strong:rgba(255,255,255,.16);
@@ -54,7 +65,7 @@
   @keyframes mqV{from{transform:translateY(0)}to{transform:translateY(-50%)}}
   @keyframes mqH{from{transform:translateX(0)}to{transform:translateX(-50%)}}
   .panel-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;pointer-events:none;padding:24px;text-align:center}
-  .panel-name{font-family:"Bitcount Grid Double",sans-serif;font-weight:300;letter-spacing:.02em;line-height:1;color:#fff;font-size:clamp(32px,5.5vw,70px);transition:transform .55s cubic-bezier(.4,0,.2,1),letter-spacing .55s cubic-bezier(.4,0,.2,1)}
+  .panel-name{font-family:"Bitcount Grid Double",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-weight:300;letter-spacing:.02em;line-height:1;color:#fff;font-size:clamp(32px,5.5vw,70px);transition:transform .55s cubic-bezier(.4,0,.2,1),letter-spacing .55s cubic-bezier(.4,0,.2,1)}
   .name-grad{background:linear-gradient(96deg,#8B7CF6,#22D3EE 58%,#F472B6);-webkit-background-clip:text;background-clip:text;color:transparent}
   .name-conf{background:linear-gradient(96deg,#F97316,#FACC15 48%,#EC4899);-webkit-background-clip:text;background-clip:text;color:transparent}
   .panel-sub{font-size:13px;font-weight:600;letter-spacing:.08em;color:rgba(255,255,255,.6);opacity:0;transform:translateY(6px);transition:opacity .45s ease,transform .45s ease}
@@ -375,9 +386,9 @@
             <div class="grp-head"><h4>캔버스 크기</h4></div>
             <div class="chips" id="gSizePresets"></div>
             <div class="size-inputs">
-              <div><label>WIDTH</label><div class="size-field"><input id="gcwInput" type="number" min="50" max="4000" value="375"><span>px</span></div></div>
+              <div><label>WIDTH</label><div class="size-field"><input id="gcwInput" type="number" min="1" max="4000" value="375"><span>px</span></div></div>
               <button class="lock-btn" id="gRatioLock" type="button" title="비율 고정" aria-label="비율 고정"><svg class="lk-on" viewBox="0 0 24 24" fill="currentColor"><path d="M18.3638 15.5355L16.9496 14.1213L18.3638 12.7071C20.3164 10.7545 20.3164 7.58866 18.3638 5.63604C16.4112 3.68341 13.2453 3.68341 11.2927 5.63604L9.87849 7.05025L8.46428 5.63604L9.87849 4.22182C12.6122 1.48815 17.0443 1.48815 19.778 4.22182C22.5117 6.95549 22.5117 11.3876 19.778 14.1213L18.3638 15.5355ZM15.5353 18.364L14.1211 19.7782C11.3875 22.5118 6.95531 22.5118 4.22164 19.7782C1.48797 17.0445 1.48797 12.6123 4.22164 9.87868L5.63585 8.46446L7.05007 9.87868L5.63585 11.2929C3.68323 13.2455 3.68323 16.4113 5.63585 18.364C7.58847 20.3166 10.7543 20.3166 12.7069 18.364L14.1211 16.9497L15.5353 18.364ZM14.8282 7.75736L16.2425 9.17157L9.17139 16.2426L7.75717 14.8284L14.8282 7.75736Z"></path></svg><svg class="lk-off" viewBox="0 0 24 24" fill="currentColor"><path d="M17 17H22V19H19V22H17V17ZM7 7H2V5H5V2H7V7ZM18.364 15.5355L16.9497 14.1213L18.364 12.7071C20.3166 10.7545 20.3166 7.58866 18.364 5.63604C16.4113 3.68342 13.2455 3.68342 11.2929 5.63604L9.87868 7.05025L8.46447 5.63604L9.87868 4.22183C12.6123 1.48816 17.0445 1.48816 19.7782 4.22183C22.5118 6.9555 22.5118 11.3877 19.7782 14.1213L18.364 15.5355ZM15.5355 18.364L14.1213 19.7782C11.3877 22.5118 6.9555 22.5118 4.22183 19.7782C1.48816 17.0445 1.48816 12.6123 4.22183 9.87868L5.63604 8.46447L7.05025 9.87868L5.63604 11.2929C3.68342 13.2455 3.68342 16.4113 5.63604 18.364C7.58866 20.3166 10.7545 20.3166 12.7071 18.364L14.1213 16.9497L15.5355 18.364ZM14.8284 7.75736L16.2426 9.17157L9.17157 16.2426L7.75736 14.8284L14.8284 7.75736Z"></path></svg><span class="lk-lottie" id="gLkLottie"></span></button>
-              <div><label>HEIGHT</label><div class="size-field"><input id="gchInput" type="number" min="50" max="4000" value="812"><span>px</span></div></div>
+              <div><label>HEIGHT</label><div class="size-field"><input id="gchInput" type="number" min="1" max="4000" value="812"><span>px</span></div></div>
             </div>
           </div>
           <div class="grp" id="gExportGrp">
@@ -453,11 +464,12 @@
             <div class="chips" id="sizePresets">
               <button class="chip" data-ar="기본">기본</button><button class="chip" data-ar="1:1">1:1</button><button class="chip" data-ar="16:9">16:9</button>
               <button class="chip" data-ar="4:3">4:3</button><button class="chip" data-ar="3:2">3:2</button><button class="chip" data-ar="9:16">9:16</button>
+              <button class="chip" id="freeSizeChip" type="button" title="가로·세로 비율 고정을 풀고 각각 자유롭게 입력">자유 입력</button>
             </div>
             <div class="size-inputs">
-              <div><label>WIDTH</label><div class="size-field"><input id="cwInput" type="number" min="50" max="4000" value="375"><span>px</span></div></div>
+              <div><label>WIDTH</label><div class="size-field"><input id="cwInput" type="number" min="1" max="4000" value="375"><span>px</span></div></div>
               <button class="lock-btn" id="ratioLock" type="button" title="비율 고정" aria-label="비율 고정"><svg class="lk-on" viewBox="0 0 24 24" fill="currentColor"><path d="M18.3638 15.5355L16.9496 14.1213L18.3638 12.7071C20.3164 10.7545 20.3164 7.58866 18.3638 5.63604C16.4112 3.68341 13.2453 3.68341 11.2927 5.63604L9.87849 7.05025L8.46428 5.63604L9.87849 4.22182C12.6122 1.48815 17.0443 1.48815 19.778 4.22182C22.5117 6.95549 22.5117 11.3876 19.778 14.1213L18.3638 15.5355ZM15.5353 18.364L14.1211 19.7782C11.3875 22.5118 6.95531 22.5118 4.22164 19.7782C1.48797 17.0445 1.48797 12.6123 4.22164 9.87868L5.63585 8.46446L7.05007 9.87868L5.63585 11.2929C3.68323 13.2455 3.68323 16.4113 5.63585 18.364C7.58847 20.3166 10.7543 20.3166 12.7069 18.364L14.1211 16.9497L15.5353 18.364ZM14.8282 7.75736L16.2425 9.17157L9.17139 16.2426L7.75717 14.8284L14.8282 7.75736Z"></path></svg><svg class="lk-off" viewBox="0 0 24 24" fill="currentColor"><path d="M17 17H22V19H19V22H17V17ZM7 7H2V5H5V2H7V7ZM18.364 15.5355L16.9497 14.1213L18.364 12.7071C20.3166 10.7545 20.3166 7.58866 18.364 5.63604C16.4113 3.68342 13.2455 3.68342 11.2929 5.63604L9.87868 7.05025L8.46447 5.63604L9.87868 4.22183C12.6123 1.48816 17.0445 1.48816 19.7782 4.22183C22.5118 6.9555 22.5118 11.3877 19.7782 14.1213L18.364 15.5355ZM15.5355 18.364L14.1213 19.7782C11.3877 22.5118 6.9555 22.5118 4.22183 19.7782C1.48816 17.0445 1.48816 12.6123 4.22183 9.87868L5.63604 8.46447L7.05025 9.87868L5.63604 11.2929C3.68342 13.2455 3.68342 16.4113 5.63604 18.364C7.58866 20.3166 10.7545 20.3166 12.7071 18.364L14.1213 16.9497L15.5355 18.364ZM14.8284 7.75736L16.2426 9.17157L9.17157 16.2426L7.75736 14.8284L14.8284 7.75736Z"></path></svg><span class="lk-lottie" id="lkLottie"></span></button>
-              <div><label>HEIGHT</label><div class="size-field"><input id="chInput" type="number" min="50" max="4000" value="812"><span>px</span></div></div>
+              <div><label>HEIGHT</label><div class="size-field"><input id="chInput" type="number" min="1" max="4000" value="812"><span>px</span></div></div>
             </div>
           </div>
 
@@ -771,12 +783,17 @@ const cwInput=document.getElementById("cwInput"), chInput=document.getElementByI
 function fitPreview(el,cw,ch){
   const host=el.parentElement, stuck=host.classList.contains("stuck");
   const vh=window.innerHeight, mobile=window.innerWidth<=860;
-  const availH=stuck?vh*0.25:Math.min(vh*0.72, mobile?540:660);
   let availW=host.clientWidth;
   if(availW){const cs=getComputedStyle(host);availW-=(parseFloat(cs.paddingLeft)||0)+(parseFloat(cs.paddingRight)||0);}
   if(!availW||availW<40) availW=Math.min(window.innerWidth,900);
-  const sMax=availH/812;                                   // 기준 높이(기본 캔버스 812)일 때 세로를 꽉 채우는 스케일
-  const s=Math.min(availW/cw, availH/ch, sMax);            // 남는 공간까지 쓰되, 작은 캔버스를 과하게 확대하진 않음
+  // 기준 높이(REF_H)로 상한 배율을 고정해두면, 실제 입력한 높이(ch)가 얼마든
+  // 그 배율이 그대로 곱해져서 가로·세로 모두 입력값에 비례해 미리보기에 반영된다.
+  // (예전엔 상한을 availH/ch 로 계산해서 ch가 커질수록 상한도 같이 줄어들며 항상
+  //  availH로 수렴 — 세로가 긴 값을 넣어도 미리보기 높이가 안 바뀌는 것처럼 보였음)
+  const REF_H=812;
+  const availH=stuck?vh*0.25:Math.min(vh*0.72, mobile?540:660);
+  const sMax=availH/REF_H;
+  const s=Math.min(availW/cw, sMax);
   const w=Math.round(cw*s), h=Math.round(ch*s);
   el.style.aspectRatio="auto"; el.style.maxWidth="none";
   el.style.width=w+"px"; el.style.height=h+"px";
@@ -786,11 +803,14 @@ function fitPreview(el,cw,ch){
 function applyCanvasSize(){ fitPreview(stageEl,cfg.cw,cfg.ch); spawnStage(); }
 const ratioLockBtn=document.getElementById("ratioLock");
 let lockedRatio=cfg.cw/cfg.ch;
-const clampDim=v=>Math.max(50,Math.min(4000,Math.round(v)));
+const clampDim=v=>Math.max(1,Math.min(4000,Math.round(v)));
 function syncSizeUI(){
   if(document.activeElement!==cwInput) cwInput.value=cfg.cw;
   if(document.activeElement!==chInput) chInput.value=cfg.ch;
-  document.querySelectorAll("#sizePresets .chip").forEach(b=>{const p=SIZE_PRESETS[b.getAttribute("data-ar")];b.classList.toggle("on",p[0]===cfg.cw&&p[1]===cfg.ch);});
+  let matched=false;
+  document.querySelectorAll("#sizePresets .chip[data-ar]").forEach(b=>{const p=SIZE_PRESETS[b.getAttribute("data-ar")];const on=p[0]===cfg.cw&&p[1]===cfg.ch;if(on)matched=true;b.classList.toggle("on",on);});
+  const freeChip=document.getElementById("freeSizeChip");
+  if(freeChip)freeChip.classList.toggle("on",!matched);
   ratioLockBtn.classList.toggle("on",!!cfg.lockRatio);
   ratioLockBtn.title=cfg.lockRatio?"비율 고정 켜짐 (한쪽 바꾸면 비율 유지)":"비율 고정 꺼짐 (가로·세로 따로 수정)";
   if(typeof updatePngUI==="function") updatePngUI();
@@ -800,8 +820,9 @@ let unlinkAnim=null;
 (function(){const cont=document.getElementById("lkLottie");if(cont&&window.lottie){try{unlinkAnim=lottie.loadAnimation({container:cont,renderer:"svg",loop:false,autoplay:false,animationData:UNLINK_JSON});ratioLockBtn.classList.add("has-lottie");unlinkAnim.addEventListener("DOMLoaded",function(){try{unlinkAnim.goToAndStop(Math.max(0,(unlinkAnim.totalFrames|0)-1),true);}catch(e){}});}catch(e){unlinkAnim=null;}}})();
 ratioLockBtn.addEventListener("click",()=>{cfg.lockRatio=!cfg.lockRatio;if(cfg.lockRatio){lockedRatio=cfg.cw/cfg.ch;}syncSizeUI();if(!cfg.lockRatio&&unlinkAnim){unlinkAnim.goToAndPlay(0,true);}});
 document.getElementById("sizePresets").addEventListener("click",e=>{const b=e.target.closest("[data-ar]");if(!b)return;const p=SIZE_PRESETS[b.getAttribute("data-ar")];cfg.cw=p[0];cfg.ch=p[1];lockedRatio=cfg.cw/cfg.ch;syncSizeUI();applyCanvasSize();});
-cwInput.addEventListener("input",()=>{const v=parseInt(cwInput.value);if(v>=50&&v<=4000){cfg.cw=v;if(cfg.lockRatio){cfg.ch=clampDim(v/lockedRatio);}syncSizeUI();applyCanvasSize();}});
-chInput.addEventListener("input",()=>{const v=parseInt(chInput.value);if(v>=50&&v<=4000){cfg.ch=v;if(cfg.lockRatio){cfg.cw=clampDim(v*lockedRatio);}syncSizeUI();applyCanvasSize();}});
+document.getElementById("freeSizeChip").addEventListener("click",()=>{cfg.lockRatio=false;syncSizeUI();cwInput.focus();});
+cwInput.addEventListener("input",()=>{const v=parseInt(cwInput.value);if(v>=1&&v<=4000){cfg.cw=v;if(cfg.lockRatio){cfg.ch=clampDim(v/lockedRatio);}syncSizeUI();applyCanvasSize();}});
+chInput.addEventListener("input",()=>{const v=parseInt(chInput.value);if(v>=1&&v<=4000){cfg.ch=v;if(cfg.lockRatio){cfg.cw=clampDim(v*lockedRatio);}syncSizeUI();applyCanvasSize();}});
 
 /* 모양 다중선택 */
 const STAR_SVG='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.0006 18.26L4.94715 22.2082L6.52248 14.2799L0.587891 8.7918L8.61493 7.84006L12.0006 0.5L15.3862 7.84006L23.4132 8.7918L17.4787 14.2799L19.054 22.2082L12.0006 18.26Z"></path></svg>';
@@ -2262,17 +2283,27 @@ function gBuildSizePresets(){
       gcfg.lockRatio=true;gLockedRatio=gcfg.cw/gcfg.ch;gSyncSizeUI();applyGradCanvasSize();
     });
     host.appendChild(b);});
+  const freeBtn=document.createElement("button");freeBtn.className="chip";freeBtn.id="gFreeSizeChip";freeBtn.type="button";freeBtn.textContent="자유 입력";
+  freeBtn.title="가로·세로 비율 고정을 풀고 각각 자유롭게 입력";
+  freeBtn.addEventListener("click",()=>{gcfg.lockRatio=false;gSyncSizeUI();gcwInput.focus();});
+  host.appendChild(freeBtn);
 }
-function gClampDim(v){return Math.max(50,Math.min(4000,Math.round(v)));}
+function gClampDim(v){return Math.max(1,Math.min(4000,Math.round(v)));}
 function gSyncSizeUI(){
   gcwInput.value=gcfg.cw;gchInput.value=gcfg.ch;
-  document.querySelectorAll("#gSizePresets .chip").forEach(b=>{const w=+b.dataset.w,h=+b.dataset.h;let on=false;
+  let gMatched=false;
+  document.querySelectorAll("#gSizePresets .chip").forEach(b=>{
+    if(b.id==="gFreeSizeChip")return;
+    const w=+b.dataset.w,h=+b.dataset.h;let on=false;
     if(b.textContent==="기본")on=(gcfg.cw===375&&gcfg.ch===812);else on=Math.abs(gcfg.cw/gcfg.ch-w/h)<0.001;
+    if(on)gMatched=true;
     b.classList.toggle("on",on);});
+  const gFreeBtn=document.getElementById("gFreeSizeChip");
+  if(gFreeBtn)gFreeBtn.classList.toggle("on",!gMatched);
   gRatioLockBtn.classList.toggle("on",gcfg.lockRatio);
 }
-gcwInput.addEventListener("input",()=>{const v=parseInt(gcwInput.value);if(v>=50&&v<=4000){gcfg.cw=v;if(gcfg.lockRatio){gcfg.ch=gClampDim(v/gLockedRatio);}gSyncSizeUI();applyGradCanvasSize();}});
-gchInput.addEventListener("input",()=>{const v=parseInt(gchInput.value);if(v>=50&&v<=4000){gcfg.ch=v;if(gcfg.lockRatio){gcfg.cw=gClampDim(v*gLockedRatio);}gSyncSizeUI();applyGradCanvasSize();}});
+gcwInput.addEventListener("input",()=>{const v=parseInt(gcwInput.value);if(v>=1&&v<=4000){gcfg.cw=v;if(gcfg.lockRatio){gcfg.ch=gClampDim(v/gLockedRatio);}gSyncSizeUI();applyGradCanvasSize();}});
+gchInput.addEventListener("input",()=>{const v=parseInt(gchInput.value);if(v>=1&&v<=4000){gcfg.ch=v;if(gcfg.lockRatio){gcfg.cw=gClampDim(v*gLockedRatio);}gSyncSizeUI();applyGradCanvasSize();}});
 let gUnlinkAnim=null;
 (function(){const cont=document.getElementById("gLkLottie");if(cont&&window.lottie){try{gUnlinkAnim=lottie.loadAnimation({container:cont,renderer:"svg",loop:false,autoplay:false,animationData:UNLINK_JSON});gRatioLockBtn.classList.add("has-lottie");gUnlinkAnim.addEventListener("DOMLoaded",function(){try{gUnlinkAnim.goToAndStop(Math.max(0,(gUnlinkAnim.totalFrames|0)-1),true);}catch(e){}});}catch(e){gUnlinkAnim=null;}}})();
 gRatioLockBtn.addEventListener("click",()=>{gcfg.lockRatio=!gcfg.lockRatio;if(gcfg.lockRatio)gLockedRatio=gcfg.cw/gcfg.ch;gSyncSizeUI();if(!gcfg.lockRatio&&gUnlinkAnim){gUnlinkAnim.goToAndPlay(0,true);}});
